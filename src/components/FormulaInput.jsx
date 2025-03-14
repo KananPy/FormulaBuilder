@@ -1,80 +1,87 @@
-import React, { useState, useRef } from "react";
-import FormulaTag from "./FormulaTag";
+// src/components/FormulaInput.jsx
+import React from "react";
+import { useFormulaStore } from "../store/formulaStore";
+import { useAutocomplete } from "../hooks/useAutocomplete";
 
 const FormulaInput = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [tags, setTags] = useState([]);
-  const inputRef = useRef(null);
+  const { tags, addTag, removeTag, clearFormula } = useFormulaStore();
+  const { query, setQuery, suggestions, isLoading } = useAutocomplete();
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+  const handleAddTag = () => {
+    addTag({
+      type: "variable",
+      value: "test-variable",
+      displayValue: "Test Variable",
+    });
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && inputValue.trim()) {
-      // Add new tag
-      const isNumeric = !isNaN(inputValue.trim());
-      setTags([
-        ...tags,
-        {
-          type: isNumeric ? "number" : "variable",
-          value: inputValue.trim(),
-          displayValue: inputValue.trim(),
-        },
-      ]);
-      setInputValue("");
-    } else if (e.key === "Backspace" && inputValue === "" && tags.length > 0) {
-      const newTags = [...tags];
-      newTags.pop();
-      setTags(newTags);
-    }
-  };
-
-  const handleRemoveTag = (index) => {
-    const newTags = tags.filter((_, i) => i !== index);
-    setTags(newTags);
-    inputRef.current.focus();
+  const handleQueryChange = (e) => {
+    setQuery(e.target.value);
   };
 
   return (
-    <div
-      className="formula-input-container"
-      style={{
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        padding: "8px",
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        minHeight: "40px",
-        color: "#333",
-      }}
-      onClick={() => inputRef.current.focus()}
-    >
-      {tags.map((tag, index) => (
-        <FormulaTag
-          key={index}
-          tag={tag}
-          index={index}
-          onRemove={handleRemoveTag}
-        />
-      ))}
+    <div>
+      <h2>Store and API Test</h2>
 
-      <input
-        ref={inputRef}
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        style={{
-          border: "none",
-          outline: "none",
-          flexGrow: 1,
-          minWidth: "50px",
-          padding: "4px",
-        }}
-        placeholder={tags.length === 0 ? "Enter a formula..." : ""}
-      />
+      <div>
+        <h3>Zustand Store Test</h3>
+        <button onClick={handleAddTag}>Add Test Tag</button>
+        <button
+          onClick={() => removeTag(tags.length - 1)}
+          disabled={tags.length === 0}
+        >
+          Remove Last Tag
+        </button>
+        <button onClick={clearFormula} disabled={tags.length === 0}>
+          Clear All
+        </button>
+
+        <div style={{ marginTop: "10px" }}>
+          <strong>Tags in store:</strong>
+          {tags.length === 0 ? (
+            <span> None</span>
+          ) : (
+            <ul>
+              {tags.map((tag, index) => (
+                <li key={index}>
+                  {tag.displayValue} ({tag.type})
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <h3>API Autocomplete Test</h3>
+        <input
+          type="text"
+          value={query}
+          onChange={handleQueryChange}
+          placeholder="Type to search..."
+          style={{ padding: "8px", width: "300px" }}
+        />
+
+        {isLoading && <div>Loading...</div>}
+
+        {!isLoading && suggestions.length > 0 && (
+          <div style={{ marginTop: "10px" }}>
+            <strong>Suggestions:</strong>
+            <ul>
+              {suggestions.map((suggestion) => (
+                <li key={suggestion.id}>
+                  {suggestion.name} - {suggestion.category}
+                  {suggestion.value !== "" && ` (Value: ${suggestion.value})`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {!isLoading && query.length >= 2 && suggestions.length === 0 && (
+          <div style={{ marginTop: "10px" }}>No suggestions found</div>
+        )}
+      </div>
     </div>
   );
 };
