@@ -12,6 +12,7 @@ const FormulaInput = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && inputValue.trim()) {
+      // Add new tag
       const isNumeric = !isNaN(inputValue.trim());
       setTags([
         ...tags,
@@ -25,12 +26,9 @@ const FormulaInput = () => {
     } else if (e.key === "Backspace" && inputValue === "" && tags.length > 0) {
       const newTags = [...tags];
       newTags.pop();
-      console.log(newTags);
-
       setTags(newTags);
     }
   };
-  console.log(tags);
 
   const handleRemoveTag = (index) => {
     const newTags = tags.filter((_, i) => i !== index);
@@ -39,7 +37,20 @@ const FormulaInput = () => {
   };
 
   return (
-    <div onClick={() => inputRef.current.focus()}>
+    <div
+      className="formula-input-container"
+      style={{
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        padding: "8px",
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        minHeight: "40px",
+        color: "#333",
+      }}
+      onClick={() => inputRef.current.focus()}
+    >
       {tags.map((tag, index) => (
         <FormulaTag
           key={index}
@@ -55,6 +66,13 @@ const FormulaInput = () => {
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
+        style={{
+          border: "none",
+          outline: "none",
+          flexGrow: 1,
+          minWidth: "50px",
+          padding: "4px",
+        }}
         placeholder={tags.length === 0 ? "Enter a formula..." : ""}
       />
     </div>
